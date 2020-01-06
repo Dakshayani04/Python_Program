@@ -7,6 +7,9 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from smtplib import SMTP
 import smtplib
+from IPython.display import HTML
+from IPython.display import display
+import numpy as np
 
 '''
     Docstring
@@ -35,7 +38,7 @@ def get_employee_detail():
 
 '''
     search the employee Id exist in AC sheet and extract the
-    rows relevant to the person and display
+    rows relevant to the Employee ID and display
 
 '''
 
@@ -53,20 +56,30 @@ def search_employee_id(check_employee_id, mailID, name):
                         result = test.drop(test.columns[cols], axis = 1)
                         result_row = result.drop(result.index[[0,3,4,5]])
                         result_row.columns = [' ', df2.iloc[10,3], df2.iloc[10,4],df2.iloc[10,5],df2.iloc[10,6],df2.iloc[10,7]]
-                        print(result_row)
-                        send_mail(result_row, mailID, name)
+                        #header_result = result_row.head()
+                        #print(header_result)
+                        #result_row['Average'] = result_row.mean(axis=1)
+                        #print(result_row)
+                        final_df = (
+                                   result_row.style
+                                   .hide_index()
+                                   .set_properties(**{'background-color': 'lightblue','color': 'black','border-color': 'black', 'width': '100px', "text-align": "center"})
+                                   .render()
+                        )
+                        send_mail(final_df, mailID, name,check_employee_id)
     else:
         pass
 
 
 '''
+
     Docstring
     function to send the mail
 
 '''
 
 
-def send_mail(data_to_mail, recipients_mailID,name):
+def send_mail(data_to_mail, recipients_mailID,name,ID):
     print(recipients_mailID)
     from_email = "dakshayani.r@exa-ag.com"
     msg = MIMEMultipart()
@@ -76,11 +89,12 @@ def send_mail(data_to_mail, recipients_mailID,name):
     <html>
       <head></head>
       <body>
-        {0}
-        {1}
+      Employee Name : {0}<br>
+      Employee ID   : {1}<br>
+            {2}
       </body>
     </html>
-    """.format(name, data_to_mail.to_html())
+    """.format(name,ID,data_to_mail)
 
     part1 = MIMEText(html, 'html')
     msg.attach(part1)
